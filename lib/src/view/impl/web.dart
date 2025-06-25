@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:web/web.dart' as web;
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
+import 'package:web/web.dart' as web;
 import 'package:webviewx_plus/src/controller/impl/web.dart';
 import 'package:webviewx_plus/src/controller/interface.dart' as ctrl_interface;
 import 'package:webviewx_plus/src/utils/constants.dart';
@@ -44,8 +44,7 @@ class WebViewX extends StatefulWidget implements view_interface.WebViewX {
   /// Callback which returns a reference to the [WebViewXController]
   /// being created.
   @override
-  final Function(ctrl_interface.WebViewXController controller)?
-      onWebViewCreated;
+  final Function(ctrl_interface.WebViewXController controller)? onWebViewCreated;
 
   /// A set of [EmbeddedJsContent].
   ///
@@ -121,8 +120,7 @@ class WebViewX extends StatefulWidget implements view_interface.WebViewX {
     this.dartCallBacks = const {},
     this.ignoreAllGestures = false,
     this.javascriptMode = JavascriptMode.unrestricted,
-    this.initialMediaPlaybackPolicy =
-        AutoMediaPlaybackPolicy.requireUserActionForAllMediaTypes,
+    this.initialMediaPlaybackPolicy = AutoMediaPlaybackPolicy.requireUserActionForAllMediaTypes,
     this.onPageStarted,
     this.onPageFinished,
     this.navigationDelegate,
@@ -159,8 +157,7 @@ class _WebViewXState extends State<WebViewX> {
 
     if (widget.initialSourceType == SourceType.html ||
         widget.initialSourceType == SourceType.urlBypass ||
-        (widget.initialSourceType == SourceType.url &&
-            widget.initialContent == 'about:blank')) {
+        (widget.initialSourceType == SourceType.url && widget.initialContent == 'about:blank')) {
       _connectJsToFlutter(then: _callOnWebViewCreatedCallback);
     } else {
       _callOnWebViewCreatedCallback();
@@ -176,8 +173,7 @@ class _WebViewXState extends State<WebViewX> {
   }
 
   void _registerView(String viewType) {
-    ui.platformViewRegistry
-        .registerViewFactory(viewType, (int viewId) => iframe);
+    ui.platformViewRegistry.registerViewFactory(viewType, (int viewId) => iframe);
   }
 
   WebViewXController _createWebViewXController() {
@@ -304,8 +300,7 @@ class _WebViewXState extends State<WebViewX> {
 
     final allow = widget.webSpecificParams.additionalAllowOptions;
 
-    if (widget.initialMediaPlaybackPolicy ==
-        AutoMediaPlaybackPolicy.alwaysAllow) {
+    if (widget.initialMediaPlaybackPolicy == AutoMediaPlaybackPolicy.alwaysAllow) {
       allow.add('autoplay');
     }
 
@@ -359,22 +354,24 @@ class _WebViewXState extends State<WebViewX> {
 
     switch (model.sourceType) {
       case SourceType.html:
-        iframe.srcdoc = HtmlUtils.preprocessSource(
+        var content = HtmlUtils.preprocessSource(
           source,
           jsContent: widget.jsContent,
           windowDisambiguator: iframeViewType,
           forWeb: true,
         );
+        iframe.srcdoc = content.toJS;
         break;
       case SourceType.url:
       case SourceType.urlBypass:
         if (source == 'about:blank') {
-          iframe.srcdoc = HtmlUtils.preprocessSource(
+          var content = HtmlUtils.preprocessSource(
             '<br>',
             jsContent: widget.jsContent,
             windowDisambiguator: iframeViewType,
             forWeb: true,
           );
+          iframe.srcdoc = content.toJS;
           break;
         }
 
@@ -407,8 +404,7 @@ class _WebViewXState extends State<WebViewX> {
     final href = dartObj['href'] as String;
     _debugLog(dartObj.toString());
 
-    if (!await _checkNavigationAllowed(
-        href, webViewXController.value.sourceType)) {
+    if (!await _checkNavigationAllowed(href, webViewXController.value.sourceType)) {
       _debugLog('Navigation not allowed for source:\n$href\n');
       return;
     }
@@ -528,12 +524,13 @@ class _WebViewXState extends State<WebViewX> {
       pageSource,
     );
 
-    iframe.srcdoc = HtmlUtils.preprocessSource(
+    var content = HtmlUtils.preprocessSource(
       replacedPageSource,
       jsContent: widget.jsContent,
       windowDisambiguator: iframeViewType,
       forWeb: true,
     );
+    iframe.srcdoc = content.toJS;
   }
 
   void _debugLog(String text) {
