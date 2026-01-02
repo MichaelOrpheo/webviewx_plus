@@ -43,11 +43,14 @@ class MobileSpecificParams {
   /// Enable WebView hybrid composition
   final bool androidEnableHybridComposition;
 
+  final String? baseUrl;
+
   /// Constructor
   const MobileSpecificParams({
     this.mobileGestureRecognizers,
     this.gestureNavigationEnabled = false,
     this.debuggingEnabled = false,
     this.androidEnableHybridComposition = false,
+    this.baseUrl,
   });
 }
