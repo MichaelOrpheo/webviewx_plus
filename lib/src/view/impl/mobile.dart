@@ -372,7 +372,7 @@ class _WebViewXState extends State<WebViewX> {
         originalWebViewController.loadHtmlString(HtmlUtils.preprocessSource(
           model.source,
           jsContent: widget.jsContent,
-        ));
+        ), baseUrl: widget.mobileSpecificParams.baseUrl);
         break;
       case SourceType.url:
       case SourceType.urlBypass:
